@@ -1,0 +1,425 @@
+/* ===== UserCard Component ===== */
+
+.uc-card {
+  position: relative;
+  background: rgba(13, 20, 40, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.uc-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
+}
+
+/* Approved / Pending themes */
+.uc-card.uc-approved {
+  border-color: rgba(16, 185, 129, 0.14);
+}
+.uc-card.uc-approved:hover {
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.uc-card.uc-pending {
+  border-color: rgba(245, 158, 11, 0.14);
+}
+.uc-card.uc-pending:hover {
+  border-color: rgba(245, 158, 11, 0.28);
+}
+
+/* ── Left accent stripe ──────────────────────────────────────────── */
+.uc-stripe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3.5px;
+  height: 100%;
+  border-radius: 18px 0 0 18px;
+}
+
+.uc-approved .uc-stripe {
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+}
+.uc-pending .uc-stripe {
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+.uc-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.uc-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-family: var(--font-display);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  letter-spacing: 0.03em;
+}
+
+.uc-header-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.uc-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.uc-name {
+  color: #f1f5f9;
+  font-weight: 700;
+  font-size: 0.92rem;
+  font-family: var(--font-display);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.uc-self-chip {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  font-size: 0.58rem;
+  padding: 0.1rem 0.38rem;
+  border-radius: 5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  border: 1px solid rgba(249, 115, 22, 0.22);
+  flex-shrink: 0;
+}
+
+.uc-email {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+
+/* Status indicator dot — top-right corner */
+.uc-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-left: auto;
+  align-self: flex-start;
+  box-shadow: 0 0 6px currentColor;
+}
+.uc-status-dot.green {
+  background: #10b981;
+  color: #10b981;
+  animation: pulse 2s infinite;
+}
+.uc-status-dot.amber {
+  background: #f59e0b;
+  color: #f59e0b;
+}
+
+/* ── Badges ──────────────────────────────────────────────── */
+.uc-badges {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+/* ── Sessions row ────────────────────────────────────────── */
+.uc-sessions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+}
+
+.uc-sessions-info {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: 1;
+  min-width: 0;
+  color: var(--text-muted);
+}
+
+.uc-sessions-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.uc-sessions-count {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.uc-sessions-count.active {
+  color: #10b981;
+}
+.uc-sessions-count.full {
+  color: #f87171;
+}
+
+/* Sessions progress bar */
+.uc-sessions-bar-track {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  overflow: hidden;
+  min-width: 40px;
+}
+.uc-sessions-bar-fill {
+  height: 100%;
+  background: #10b981;
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+.uc-sessions-bar-fill.full {
+  background: #f87171;
+}
+
+/* Manage sessions button */
+.uc-manage-btn {
+  background: rgba(249, 115, 22, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.25);
+  color: #f97316;
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  flex-shrink: 0;
+}
+.uc-manage-btn:hover {
+  background: rgba(249, 115, 22, 0.16);
+  border-color: rgba(249, 115, 22, 0.45);
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.2);
+}
+
+/* ── Meta dates grid ─────────────────────────────────────── */
+.uc-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.75rem;
+}
+
+.uc-meta-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  color: var(--text-muted);
+}
+
+.uc-meta-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-bottom: 0.12rem;
+  font-weight: 600;
+}
+
+.uc-meta-val {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Action buttons ──────────────────────────────────────── */
+.uc-actions {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.85rem;
+}
+
+.uc-action-btn {
+  flex: 1 1 auto;
+  min-width: 80px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 0.52rem 0.75rem;
+  font-size: 0.73rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s, opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.32rem;
+  white-space: nowrap;
+  line-height: 1;
+}
+.uc-action-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.03);
+  filter: brightness(1.1);
+}
+.uc-action-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.uc-action-btn:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Approve — green */
+.uc-btn-approve {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.12);
+}
+.uc-btn-approve:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.4);
+  border-color: rgba(16, 185, 129, 0.65);
+}
+
+/* Make Admin — purple */
+.uc-btn-admin {
+  background: rgba(168, 85, 247, 0.09);
+  border-color: rgba(168, 85, 247, 0.3);
+  color: #c084fc;
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.1);
+}
+.uc-btn-admin:hover:not(:disabled) {
+  background: rgba(168, 85, 247, 0.18);
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.38);
+  border-color: rgba(168, 85, 247, 0.6);
+}
+
+/* Make User — pink */
+.uc-btn-demote {
+  background: rgba(244, 114, 182, 0.09);
+  border-color: rgba(244, 114, 182, 0.3);
+  color: #f472b6;
+  box-shadow: 0 0 8px rgba(244, 114, 182, 0.1);
+}
+.uc-btn-demote:hover:not(:disabled) {
+  background: rgba(244, 114, 182, 0.18);
+  box-shadow: 0 0 18px rgba(244, 114, 182, 0.38);
+  border-color: rgba(244, 114, 182, 0.6);
+}
+
+/* Revoke/Delete — red */
+.uc-btn-delete {
+  background: rgba(239, 68, 68, 0.09);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.1);
+  flex-basis: 100%;
+}
+.uc-btn-delete:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.18);
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.4);
+  border-color: rgba(239, 68, 68, 0.6);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   ════════════════════════════════════════════════════════════════ */
+
+/* Large mobile (640px) */
+@media (max-width: 640px) {
+  .uc-card {
+    padding: 1.1rem 1.1rem 1.1rem 1.35rem;
+    border-radius: 16px;
+    gap: 0.8rem;
+  }
+  .uc-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    font-size: 0.88rem;
+  }
+}
+
+/* Mobile (480px) */
+@media (max-width: 480px) {
+  .uc-card {
+    padding: 1rem 1rem 1rem 1.25rem;
+    border-radius: 14px;
+    gap: 0.75rem;
+  }
+  .uc-name {
+    font-size: 0.88rem;
+  }
+  .uc-email {
+    font-size: 0.7rem;
+  }
+  .uc-meta-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .uc-actions {
+    gap: 0.38rem;
+  }
+  .uc-action-btn {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.65rem;
+    min-width: 70px;
+  }
+}
+
+/* Small mobile (360px) */
+@media (max-width: 360px) {
+  .uc-card {
+    padding: 0.875rem 0.875rem 0.875rem 1.1rem;
+  }
+  .uc-sessions-bar-track {
+    display: none;
+  }
+  .uc-action-btn {
+    flex: 1 1 100%;
+    min-width: unset;
+  }
+}

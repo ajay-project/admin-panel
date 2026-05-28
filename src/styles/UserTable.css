@@ -1,0 +1,308 @@
+/* ===== User Table ===== */
+
+.tbl-container {
+  background: rgba(13, 20, 40, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  width: 100%;
+}
+
+/* No horizontal scroll — table adapts to container width */
+.tbl-scroll-wrapper {
+  overflow: visible;
+  width: 100%;
+}
+
+/* ── Table layout: fixed so columns respect their given widths ── */
+.tbl-element {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  table-layout: fixed;  /* KEY: prevents table from overflowing */
+}
+
+/* ── Column width distribution (total = 100%) ──────────────────
+   User     15%  — avatar + name
+   Email    22%  — longest text, ellipsis
+   Role      9%  — small badge
+   Status    9%  — small badge
+   Sessions  9%  — count + icon
+   Joined   12%  — date
+   Active   13%  — date
+   Actions  11%  — 3 icon-only buttons
+   ─────────────────────────────────────────────────────────────── */
+.tbl-col-user     { width: 15%; }
+.tbl-col-email    { width: 22%; }
+.tbl-col-role     { width:  9%; }
+.tbl-col-status   { width:  9%; }
+.tbl-col-sessions { width:  9%; }
+.tbl-col-joined   { width: 12%; }
+.tbl-col-active   { width: 13%; }
+.tbl-col-actions  { width: 11%; }
+
+/* ── Header ──────────────────────────────────────────────── */
+.tbl-header-row {
+  background: rgba(255, 255, 255, 0.025);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.tbl-header-cell {
+  padding: 0.7rem 0.75rem;
+  text-align: left;
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: var(--font-display);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: rgba(13, 18, 38, 0.95);
+}
+
+.tbl-header-cell.align-right {
+  text-align: right;
+}
+
+/* ── Body rows ──────────────────────────────────────────────── */
+.tbl-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s;
+}
+
+.tbl-row:last-child {
+  border-bottom: none;
+}
+
+.tbl-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.tbl-row:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.tbl-cell {
+  padding: 0.7rem 0.75rem;
+  vertical-align: middle;
+  overflow: hidden;       /* prevent any cell from overflowing its column */
+}
+
+.tbl-cell.align-right {
+  text-align: right;
+}
+
+/* ── User column ──────────────────────────────────────────────── */
+.tbl-user-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  overflow: hidden;
+}
+
+.tbl-user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+
+.tbl-user-name {
+  color: #f1f5f9;
+  font-weight: 600;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.tbl-user-self-badge {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  font-size: 0.55rem;
+  padding: 0.08rem 0.3rem;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── Email column ──────────────────────────────────────────────── */
+.tbl-cell-email {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Date columns ──────────────────────────────────────────────── */
+.tbl-cell-joined,
+.tbl-cell-active {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tbl-cell-never {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.73rem;
+}
+
+/* ── Sessions column ──────────────────────────────────────────────── */
+.tbl-sessions-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.tbl-sessions-count {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tbl-sessions-count.active {
+  color: #10b981;
+}
+
+.tbl-sessions-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  padding: 3px 7px;
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  transition: all 0.18s;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  flex-shrink: 0;
+}
+
+.tbl-sessions-btn:hover {
+  border-color: rgba(249, 115, 22, 0.4);
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.06);
+}
+
+/* ── Action buttons ──────────────────────────────────────────────── */
+.tbl-actions-wrapper {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+
+.tbl-btn {
+  border: 1px solid transparent;
+  cursor: pointer;
+  /* Square icon-only button */
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s, opacity 0.15s;
+  line-height: 1;
+}
+
+.tbl-btn:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.05);
+  filter: brightness(1.12);
+}
+
+.tbl-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.tbl-btn:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Approve — green */
+.tbl-btn-approve {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+.tbl-btn-approve:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.6);
+}
+
+/* Make Admin — purple */
+.tbl-btn-admin {
+  background: rgba(168, 85, 247, 0.09);
+  border-color: rgba(168, 85, 247, 0.3);
+  color: #c084fc;
+}
+.tbl-btn-admin:hover:not(:disabled) {
+  background: rgba(168, 85, 247, 0.18);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+  border-color: rgba(168, 85, 247, 0.55);
+}
+
+/* Make User — pink */
+.tbl-btn-demote {
+  background: rgba(244, 114, 182, 0.09);
+  border-color: rgba(244, 114, 182, 0.3);
+  color: #f472b6;
+}
+.tbl-btn-demote:hover:not(:disabled) {
+  background: rgba(244, 114, 182, 0.18);
+  box-shadow: 0 0 10px rgba(244, 114, 182, 0.3);
+  border-color: rgba(244, 114, 182, 0.55);
+}
+
+/* Delete — red */
+.tbl-btn-delete {
+  background: rgba(239, 68, 68, 0.09);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+.tbl-btn-delete:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.18);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.55);
+}

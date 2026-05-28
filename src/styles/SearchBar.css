@@ -1,0 +1,338 @@
+/* ===== SearchBar Component ===== */
+
+/* Container — solid bg, NO backdrop-filter (would break dropdown stacking) */
+.sbc-container {
+  background: rgba(13, 20, 40, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 1.1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Main row */
+.sbc-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+/* ── Shared label ──────────────────────────────────────────────── */
+.sbc-label {
+  display: block;
+  font-size: 0.67rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  margin-bottom: 0.38rem;
+  font-family: var(--font-display);
+  user-select: none;
+}
+
+/* ── Search input group ──────────────────────────────────────────── */
+.sbc-search-group {
+  flex: 1 1 240px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sbc-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sbc-input-icon {
+  position: absolute;
+  left: 0.85rem;
+  color: var(--text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.sbc-input {
+  width: 100%;
+  background: rgba(7, 12, 28, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.72rem 2.5rem 0.72rem 2.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.sbc-input:focus {
+  border-color: rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.sbc-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Inline clear button inside input */
+.sbc-input-clear {
+  position: absolute;
+  right: 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.sbc-input-clear:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+/* ── Custom Select group ──────────────────────────────────────────── */
+.sbc-select-group {
+  flex: 0 1 160px;
+  min-width: 130px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* Must be relative so dropdown positions from this anchor */
+}
+
+/* Trigger button — looks like an input */
+.sbc-trigger {
+  width: 100%;
+  background: rgba(7, 12, 28, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.72rem 0.85rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sbc-trigger:hover,
+.sbc-trigger.open {
+  border-color: rgba(249, 115, 22, 0.45);
+}
+
+.sbc-trigger.open {
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.sbc-trigger-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Animated chevron */
+.sbc-chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 0.18s ease;
+}
+
+.sbc-chevron.rotated {
+  transform: rotate(180deg);
+}
+
+/* ── Dropdown list ──────────────────────────────────────────────── */
+.sbc-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  /* 
+   * z-index: 9999 ensures the dropdown always appears above everything —
+   * tables, cards, stat grids, modals — regardless of stacking contexts.
+   */
+  z-index: 9999;
+  background: #0d1830;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.35rem;
+  margin: 0;
+  list-style: none;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(249, 115, 22, 0.08);
+  animation: sbcDropIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes sbcDropIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.sbc-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  user-select: none;
+  font-family: var(--font-sans);
+}
+
+.sbc-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.sbc-option.selected {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+  font-weight: 600;
+}
+
+.sbc-option.selected:hover {
+  background: rgba(249, 115, 22, 0.15);
+}
+
+/* ── Right-side cluster ──────────────────────────────────────────── */
+.sbc-end-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+  align-self: flex-end;
+}
+
+.sbc-results-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.sbc-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  border-radius: 10px;
+  padding: 0.48rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-display);
+  transition: background 0.18s, box-shadow 0.18s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.sbc-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.14);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+  transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   ════════════════════════════════════════════════════════════════ */
+
+/* Tablet (768px) */
+@media (max-width: 768px) {
+  .sbc-container {
+    padding: 1rem 1.1rem;
+  }
+}
+
+/* Large mobile (640px) */
+@media (max-width: 640px) {
+  .sbc-container {
+    padding: 0.875rem 1rem;
+    border-radius: 14px;
+    margin-bottom: 1rem;
+  }
+  .sbc-row {
+    gap: 0.6rem;
+  }
+  /* Search takes full row */
+  .sbc-search-group {
+    flex: 1 1 100%;
+  }
+  /* Dropdowns side-by-side */
+  .sbc-select-group {
+    flex: 1 1 calc(50% - 0.3rem);
+    min-width: 0;
+  }
+  /* End cluster full width */
+  .sbc-end-cluster {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+  }
+  /* Dropdown always opens DOWNWARD — top is already set in base styles */
+}
+
+/* Mobile (480px) */
+@media (max-width: 480px) {
+  .sbc-container {
+    padding: 0.875rem;
+    border-radius: 12px;
+  }
+  .sbc-input,
+  .sbc-trigger {
+    font-size: 0.82rem;
+    padding-top: 0.62rem;
+    padding-bottom: 0.62rem;
+  }
+  .sbc-select-group {
+    flex: 1 1 100%;
+  }
+  .sbc-end-cluster {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .sbc-results-badge {
+    justify-content: center;
+    width: 100%;
+  }
+  .sbc-clear-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
