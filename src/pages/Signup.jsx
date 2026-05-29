@@ -9,9 +9,10 @@ export default function Signup() {
   const [showPwd,      setShowPwd]      = useState(false)
   const [strength,     setStrength]     = useState(0)
   const [error,        setError]        = useState('')
-  const [success,      setSuccess]      = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [redirecting,  setRedirecting]  = useState(false)
+  const [redirectType, setRedirectType] = useState('') // 'scenario_a' | 'scenario_b' | 'scenario_c'
   const [countdown,    setCountdown]    = useState(5)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { signup, user, profile }       = useAuth()
   const navigate                        = useNavigate()
 
@@ -36,10 +37,13 @@ export default function Signup() {
 
   useEffect(() => {
     let t
-    if (success && countdown > 0) t = setTimeout(() => setCountdown(c => c - 1), 1000)
-    else if (success && countdown === 0) navigate('/login')
+    if (redirecting && countdown > 0) {
+      t = setTimeout(() => setCountdown(c => c - 1), 1000)
+    } else if (redirecting && countdown === 0) {
+      navigate('/login')
+    }
     return () => clearTimeout(t)
-  }, [success, countdown, navigate])
+  }, [redirecting, countdown, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -49,27 +53,73 @@ export default function Signup() {
     setError('')
     try {
       await signup(email, password, name)
-      setSuccess(true)
+      // Scenario C: Clear inputs and redirect
+      setName('')
+      setEmail('')
+      setPassword('')
+      setRedirectType('scenario_c')
+      setCountdown(5)
+      setRedirecting(true)
     } catch (err) {
-      setError(err.message || 'Failed to submit request. Please try again.')
+      const msg = err.message || ''
+      if (msg.includes('already registered. Please login')) {
+        // Scenario A: Clear inputs and redirect
+        setName('')
+        setEmail('')
+        setPassword('')
+        setRedirectType('scenario_a')
+        setCountdown(5)
+        setRedirecting(true)
+      } else if (msg.includes('wait for admin approval')) {
+        // Scenario B: Clear inputs and redirect
+        setName('')
+        setEmail('')
+        setPassword('')
+        setRedirectType('scenario_b')
+        setCountdown(5)
+        setRedirecting(true)
+      } else {
+        setError(msg || 'Failed to submit request. Please try again.')
+      }
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const strengthColor = ['#ef4444','#f97316','#f59e0b','#10b981','#10b981'][strength] || '#ef4444'
-  const strengthLabel = ['','Weak','Fair','Good','Strong','Very Strong'][strength] || ''
+  if (redirecting) {
+    let title = ""
+    let alertMessage = ""
+    let detailMessage = ""
+    let iconColor = '#10b981' // green
+    let iconBg = 'rgba(16,185,129,0.1)'
+    let iconBorder = 'rgba(16,185,129,0.4)'
+    let glow = '0 0 30px rgba(16,185,129,0.2)'
 
-  if (success) {
+    if (redirectType === 'scenario_a') {
+      title = "Account Registered"
+      alertMessage = "This email is already registered. Please login."
+      iconColor = '#3b82f6' // blue
+      iconBg = 'rgba(59,130,246,0.1)'
+      iconBorder = 'rgba(59,130,246,0.4)'
+      glow = '0 0 30px rgba(59,130,246,0.2)'
+    } else if (redirectType === 'scenario_b') {
+      title = "Pending Approval"
+      alertMessage = "You have already registered. Please wait for admin approval."
+      iconColor = '#f97316' // orange
+      iconBg = 'rgba(249,115,22,0.1)'
+      iconBorder = 'rgba(249,115,22,0.4)'
+      glow = '0 0 30px rgba(249,115,22,0.2)'
+    } else if (redirectType === 'scenario_c') {
+      title = "Registration successful"
+      alertMessage = "Awaiting administrator approval."
+      detailMessage = "Your registration has been completed and your administrator will review your account."
+    }
+
     return (
       <>
         <style>{`
           .success-check circle { animation: none; }
           .success-check polyline { stroke-dasharray: 60; stroke-dashoffset: 0; animation: checkDraw 0.6s ease 0.3s both; }
-          @keyframes countdownBar {
-            from { width: 100%; }
-            to   { width: 0%; }
-          }
           @media (max-width: 500px) {
             .admin-signup-container {
               padding: 1rem !important;
@@ -94,27 +144,27 @@ export default function Signup() {
           <div className="admin-signup-card" style={{
             background: 'rgba(13,20,40,0.85)',
             backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(16,185,129,0.2)',
+            border: `1px solid ${iconBorder}`,
             borderRadius: 'var(--radius-2xl)',
             padding: '3rem 2.5rem',
             maxWidth: '460px',
             width: '100%',
             textAlign: 'center',
-            boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 40px rgba(16,185,129,0.07)',
+            boxShadow: `0 32px 80px rgba(0,0,0,0.6), ${glow}`,
             animation: 'fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}>
-            {/* Animated check */}
+            {/* Animated check / info icon */}
             <div style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               width: '72px', height: '72px', borderRadius: '50%',
-              background: 'rgba(16,185,129,0.1)',
-              border: '2px solid rgba(16,185,129,0.4)',
+              background: iconBg,
+              border: `2px solid ${iconBorder}`,
               marginBottom: '1.5rem',
-              boxShadow: '0 0 30px rgba(16,185,129,0.2)',
+              boxShadow: glow,
             }}>
               <svg className="success-check" width="36" height="36" viewBox="0 0 52 52" fill="none">
-                <circle cx="26" cy="26" r="25" stroke="#10b981" strokeWidth="2" fill="none"/>
-                <polyline fill="none" stroke="#10b981" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"
+                <circle cx="26" cy="26" r="25" stroke={iconColor} strokeWidth="2" fill="none"/>
+                <polyline fill="none" stroke={iconColor} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"
                   strokeDasharray="60" strokeDashoffset="0"
                   style={{ animation: 'checkDraw 0.6s ease 0.2s both' }}
                   points="14,27 23,36 38,18"/>
@@ -125,15 +175,27 @@ export default function Signup() {
               fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 800,
               color: '#f1f5f9', marginBottom: '0.75rem',
             }}>
-              Request Submitted!
+              {title}
             </h2>
-            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, fontSize: '0.9rem', marginBottom: '1rem' }}>
-              Your profile has been created and is <strong style={{ color: '#f97316' }}>pending approval</strong>.
-              An administrator must approve your account before you can sign in.
-            </p>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '1.75rem' }}>
-              You'll be notified once access is granted.
-            </p>
+            {detailMessage ? (
+              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+                {alertMessage}
+              </p>
+            ) : null}
+
+            <div style={{
+              background: 'rgba(255,255,255,0.02)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.9rem 1rem',
+              border: '1px solid rgba(255,255,255,0.05)',
+              color: 'var(--text-muted)',
+              fontSize: '0.88rem',
+              lineHeight: 1.6,
+              marginBottom: '1.75rem',
+              textAlign: 'center'
+            }}>
+              {detailMessage || alertMessage}
+            </div>
 
             {/* Countdown bar */}
             <div style={{
@@ -141,20 +203,40 @@ export default function Signup() {
               borderRadius: 'var(--radius-md)',
               padding: '0.9rem 1rem',
               border: '1px solid rgba(255,255,255,0.06)',
+              marginBottom: '1.75rem',
             }}>
               <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.6rem' }}>
                 Redirecting to login in <strong style={{ color: '#f97316', fontFamily: 'var(--font-mono)' }}>{countdown}s</strong>
               </div>
-              <div style={{ height: '3px', background: 'rgba(255,255,255,0.06)', borderRadius: '999px', overflow: 'hidden' }}>
+              <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', overflow: 'hidden' }}>
                 <div style={{
                   height: '100%',
                   background: 'linear-gradient(90deg, #f97316, #ea580c)',
-                  borderRadius: '999px',
-                  animation: `countdownBar ${countdown + 1}s linear forwards`,
-                  boxShadow: '0 0 8px rgba(249,115,22,0.5)',
+                  width: `${(countdown / 5) * 100}%`,
+                  transition: 'width 1s linear',
                 }} />
               </div>
             </div>
+
+            <Link
+              to="/login"
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: '0.85rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                color: '#fff',
+                fontWeight: 700,
+                textDecoration: 'none',
+                boxShadow: '0 4px 15px rgba(249,115,22,0.3)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+              }}
+              onMouseOver={e => e.target.style.transform = 'translateY(-2px)'}
+              onMouseOut={e => e.target.style.transform = 'translateY(0)'}
+            >
+              Back to Login
+            </Link>
           </div>
         </div>
       </>
