@@ -35,6 +35,9 @@ export default function Signup() {
     setStrength(calcStrength(v))
   }
 
+  const strengthColor = ['#ef4444','#f97316','#f59e0b','#10b981','#10b981'][strength] || '#ef4444'
+  const strengthLabel = ['','Weak','Fair','Good','Strong','Very Strong'][strength] || ''
+
   useEffect(() => {
     let t
     if (redirecting && countdown > 0) {
