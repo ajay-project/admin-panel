@@ -2,8 +2,11 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-// sessionService is dynamically imported at call-sites (same pattern as AuthContext)
-// to keep it out of the initial bundle and prevent Vite's mixed-import warning.
+import {
+  validateSessionLimit,
+  revokeOldestSession,
+  createSession
+} from '../services/sessionService'
 
 export default function VerifyAccount() {
   const navigate = useNavigate()
@@ -18,7 +21,6 @@ export default function VerifyAccount() {
     setStatus('verifying')
     try {
       // 1. Establish session in DB first
-      const { createSession } = await import('../services/sessionService')
       await createSession(userId)
 
       // 2. Write cache atomically
@@ -64,7 +66,6 @@ export default function VerifyAccount() {
 
     try {
       // Terminate oldest session to make room
-      const { revokeOldestSession } = await import('../services/sessionService')
       await revokeOldestSession(userId)
 
       // Fetch profile
@@ -148,7 +149,6 @@ export default function VerifyAccount() {
         // IF: profile.approved === true
         if (profile.approved === true) {
           // ── Device Limit Validation ──────────────────────────────────────────
-          const { validateSessionLimit } = await import('../services/sessionService')
           const { allowed, activeCount, maxSessions } = await validateSessionLimit(userId)
 
           if (!allowed) {
