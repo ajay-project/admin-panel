@@ -1,5 +1,6 @@
 import React from 'react'
 import StatusBadge from './StatusBadge'
+import { FEATURE_FLAGS } from '../config/featureFlags'
 import '../styles/UserCard.css'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -102,7 +103,7 @@ export default function UserCard({
   const initials   = (user.email || 'US').substring(0, 2).toUpperCase()
 
   const activeSessions = user.active_sessions_count || 0
-  const maxSessions    = user.max_sessions || (user.role === 'admin' ? 2 : 1)
+  const maxSessions    = user.max_sessions || (user.role === 'admin' ? FEATURE_FLAGS.DEFAULT_MAX_SESSIONS_ADMIN : FEATURE_FLAGS.DEFAULT_MAX_SESSIONS_USER)
   const sessionsFull   = activeSessions >= maxSessions
 
   const joined    = formatDate(user.created_at)

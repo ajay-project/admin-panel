@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { FEATURE_FLAGS } from "../config/featureFlags";
 
 /**
  * Capture/store device info using navigator.userAgent.
@@ -68,7 +69,7 @@ export const validateSessionLimit = async (userId) => {
     return { allowed: true, activeCount: 0, maxSessions: 1 };
   }
 
-  const maxSessions = user.max_sessions ?? (user.role === 'admin' ? 2 : 1);
+  const maxSessions = user.max_sessions ?? (user.role === 'admin' ? FEATURE_FLAGS.DEFAULT_MAX_SESSIONS_ADMIN : FEATURE_FLAGS.DEFAULT_MAX_SESSIONS_USER);
 
   // Query actual active sessions count from active_sessions table
   const { count, error: countError } = await supabase
@@ -280,9 +281,19 @@ export const validateCurrentSession = async (sessionToken) => {
     }
   }
 
-  const isValid = data.is_active === true && isApproved;
+  // PREMIUM FEATURE
+  // Auto Access Revocation
+  // Disabled via feature flag
+  // To re-enable:
+  // FEATURE_FLAGS.AUTO_ACCESS_REVOCATION = true
+  const isValid = data.is_active === true && (FEATURE_FLAGS.AUTO_ACCESS_REVOCATION ? isApproved : true);
 
-  if (data.is_active === true && !isApproved) {
+  // PREMIUM FEATURE
+  // Auto Access Revocation
+  // Disabled via feature flag
+  // To re-enable:
+  // FEATURE_FLAGS.AUTO_ACCESS_REVOCATION = true
+  if (FEATURE_FLAGS.AUTO_ACCESS_REVOCATION && data.is_active === true && !isApproved) {
     try {
       await supabase
         .from("active_sessions")

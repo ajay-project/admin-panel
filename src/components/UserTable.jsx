@@ -1,5 +1,6 @@
 import React from 'react'
 import StatusBadge from './StatusBadge'
+import { FEATURE_FLAGS } from '../config/featureFlags'
 import '../styles/UserTable.css'
 
 /**
@@ -32,17 +33,7 @@ export default function UserTable({
       <div className="tbl-scroll-wrapper">
         <table className="tbl-element">
 
-          {/* Fixed column widths — total = 100% */}
-          <colgroup>
-            <col className="tbl-col-user"     />  {/* 14% */}
-            <col className="tbl-col-email"    />  {/* 20% */}
-            <col className="tbl-col-role"     />  {/*  8% */}
-            <col className="tbl-col-status"   />  {/*  9% */}
-            <col className="tbl-col-sessions" />  {/* 10% */}
-            <col className="tbl-col-joined"   />  {/* 11% */}
-            <col className="tbl-col-active"   />  {/* 11% */}
-            <col className="tbl-col-actions"  />  {/* 17% */}
-          </colgroup>
+          <colgroup><col className="tbl-col-user"/><col className="tbl-col-email"/><col className="tbl-col-role"/><col className="tbl-col-status"/><col className="tbl-col-sessions"/><col className="tbl-col-joined"/><col className="tbl-col-active"/><col className="tbl-col-actions"/></colgroup>
 
           <thead>
             <tr className="tbl-header-row">
@@ -102,7 +93,7 @@ export default function UserTable({
                   <td className="tbl-cell">
                     <div className="tbl-sessions-wrapper">
                       <span className={`tbl-sessions-count ${(user.active_sessions_count || 0) > 0 ? 'active' : ''}`}>
-                        {user.active_sessions_count || 0}/{user.max_sessions || (user.role === 'admin' ? 2 : 1)}
+                        {user.active_sessions_count || 0}/{user.max_sessions || (user.role === 'admin' ? FEATURE_FLAGS.DEFAULT_MAX_SESSIONS_ADMIN : FEATURE_FLAGS.DEFAULT_MAX_SESSIONS_USER)}
                       </span>
                       <button
                         className="tbl-sessions-btn"

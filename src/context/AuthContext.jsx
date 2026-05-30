@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { signupUser, logoutUser, fetchUserProfile } from '../services/authService'
+import { FEATURE_FLAGS } from '../config/featureFlags'
 
 export const AuthContext = createContext(null)
 
@@ -212,8 +213,15 @@ export function AuthProvider({ children }) {
     }
 
     if (user && profile) {
-      const REVALIDATION_INTERVAL = 30 * 60 * 1000
-      intervalId = setInterval(runRevalidation, REVALIDATION_INTERVAL)
+      // PREMIUM FEATURE
+      // Auto Access Revocation
+      // Disabled via feature flag
+      // To re-enable:
+      // FEATURE_FLAGS.AUTO_ACCESS_REVOCATION = true
+      if (FEATURE_FLAGS.AUTO_ACCESS_REVOCATION) {
+        const REVALIDATION_INTERVAL = 30 * 60 * 1000
+        intervalId = setInterval(runRevalidation, REVALIDATION_INTERVAL)
+      }
     }
 
     return () => {
@@ -241,8 +249,15 @@ export function AuthProvider({ children }) {
           console.error("Heartbeat error:", err)
         }
       }
-      runHeartbeat()
-      heartbeatId = setInterval(runHeartbeat, 10 * 60 * 1000)
+      // PREMIUM FEATURE
+      // Heartbeat-Based Permission Revalidation
+      // Disabled via feature flag
+      // To re-enable:
+      // FEATURE_FLAGS.HEARTBEAT_REVALIDATION = true
+      if (FEATURE_FLAGS.HEARTBEAT_REVALIDATION) {
+        runHeartbeat()
+        heartbeatId = setInterval(runHeartbeat, 10 * 60 * 1000)
+      }
 
       // 2. Auto Cleanup every 10 minutes
       const runCleanup = async () => {
@@ -295,7 +310,14 @@ export function AuthProvider({ children }) {
           console.error("Session validation error:", err)
         }
       }
-      validationId = setInterval(runValidation, 5 * 60 * 1000)
+      // PREMIUM FEATURE
+      // Premium Session Monitoring
+      // Disabled via feature flag
+      // To re-enable:
+      // FEATURE_FLAGS.PREMIUM_SESSION_MONITORING = true
+      if (FEATURE_FLAGS.PREMIUM_SESSION_MONITORING) {
+        validationId = setInterval(runValidation, 5 * 60 * 1000)
+      }
     }
 
     return () => {

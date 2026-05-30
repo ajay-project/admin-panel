@@ -171,16 +171,24 @@
 }
 
 .limit-select {
-  background: rgba(13, 20, 40, 0.8);
+  background-color: rgba(13, 20, 40, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
   border-radius: 8px;
-  padding: 0.35rem 0.75rem;
+  padding: 0.35rem 2.2rem 0.35rem 0.75rem;
   font-family: var(--font-mono);
   font-size: 0.9rem;
+  line-height: 1.4;
   outline: none;
   cursor: pointer;
   flex-shrink: 0;
+  position: relative;
+  vertical-align: middle;
+}
+
+.limit-select option {
+  background-color: #0d1424;
+  color: var(--text-primary);
 }
 
 .limit-select:focus {
@@ -415,6 +423,87 @@
   color: #fff;
 }
 
+/* Custom Select Dropdown */
+.custom-select-container {
+  position: relative;
+  flex-shrink: 0;
+  width: 100px;
+}
+
+.custom-select-trigger {
+  width: 100%;
+  background: rgba(13, 20, 40, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.custom-select-trigger:focus,
+.custom-select-trigger:hover:not(:disabled) {
+  border-color: #f97316;
+  background-color: rgba(13, 20, 40, 0.95);
+}
+
+.custom-select-trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chevron-icon {
+  transition: transform 0.2s;
+  color: var(--text-secondary);
+}
+
+.chevron-icon.open {
+  transform: rotate(180deg);
+}
+
+.custom-select-options {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: #0d1424;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  overflow: hidden;
+  animation: slideDown 0.15s ease-out;
+}
+
+.custom-select-option {
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  text-align: left;
+}
+
+.custom-select-option:hover {
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--text-primary);
+}
+
+.custom-select-option.selected {
+  background: #f97316;
+  color: white;
+  font-weight: 600;
+}
+
+
 /* ═══════════════════════════════════════════════════════════════
    RESPONSIVE BREAKPOINTS
    ════════════════════════════════════════════════════════════════ */
@@ -457,7 +546,7 @@
     gap: 0.75rem;
     padding: 1rem;
   }
-  .limit-select,
+  .custom-select-container,
   .limit-save-btn {
     width: 100%;
   }

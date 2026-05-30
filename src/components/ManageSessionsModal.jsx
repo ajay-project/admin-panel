@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { FEATURE_FLAGS } from '../config/featureFlags'
 import {
   getUserSessions,
   forceLogoutSession,
@@ -21,10 +22,22 @@ export default function ManageSessionsModal({
   const [actionSessionId, setActionSessionId] = useState(null)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showDropdown, setShowDropdown] = useState(false)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   useEffect(() => {
     if (isOpen && user) {
-      setLimit(user.max_sessions || (user.role === 'admin' ? 2 : 1))
+      setLimit(user.max_sessions || (user.role === 'admin' ? FEATURE_FLAGS.DEFAULT_MAX_SESSIONS_ADMIN : FEATURE_FLAGS.DEFAULT_MAX_SESSIONS_USER))
       fetchSessions()
     } else {
       setSessions([])
@@ -144,10 +157,9 @@ export default function ManageSessionsModal({
 
   if (!isOpen || !user) return null
 
-  // Determine limits bounds based on user role
   const isUserAdmin = user.role === 'admin'
   const minLimit = 1
-  const maxLimit = isUserAdmin ? 10 : 5
+  const maxLimit = FEATURE_FLAGS.DROPDOWN_MAX_LIMIT
 
   return (
     <div
@@ -211,20 +223,40 @@ export default function ManageSessionsModal({
                 Limit concurrent logged-in screens ({minLimit} to {maxLimit} screens based on role).
               </div>
             </div>
-            <select
-              className="limit-select"
-              value={limit}
-              onChange={(e) => setLimit(parseInt(e.target.value))}
-              disabled={savingLimit}
-            >
-              {Array.from({ length: maxLimit - minLimit + 1 }, (_, i) => minLimit + i).map(n => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </select>
+            <div className="custom-select-container" ref={dropdownRef}>
+              <button
+                type="button"
+                className="custom-select-trigger"
+                onClick={() => !savingLimit && setShowDropdown(!showDropdown)}
+                disabled={savingLimit}
+              >
+                <span>{limit}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`chevron-icon ${showDropdown ? 'open' : ''}`}>
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              
+              {showDropdown && (
+                <div className="custom-select-options">
+                  {Array.from({ length: maxLimit - minLimit + 1 }, (_, i) => minLimit + i).map(n => (
+                    <div
+                      key={n}
+                      className={`custom-select-option ${limit === n ? 'selected' : ''}`}
+                      onClick={() => {
+                        setLimit(n)
+                        setShowDropdown(false)
+                      }}
+                    >
+                      {n}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               className="limit-save-btn"
               onClick={handleSaveLimit}
-              disabled={savingLimit || limit === (user.max_sessions || (user.role === 'admin' ? 2 : 1))}
+              disabled={savingLimit || limit === (user.max_sessions || (user.role === 'admin' ? FEATURE_FLAGS.DEFAULT_MAX_SESSIONS_ADMIN : FEATURE_FLAGS.DEFAULT_MAX_SESSIONS_USER))}
             >
               {savingLimit ? 'Saving…' : 'Save Limit'}
             </button>

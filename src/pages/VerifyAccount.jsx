@@ -7,6 +7,7 @@ import {
   revokeOldestSession,
   createSession
 } from '../services/sessionService'
+import { FEATURE_FLAGS } from '../config/featureFlags'
 
 export default function VerifyAccount() {
   const navigate = useNavigate()
@@ -148,14 +149,21 @@ export default function VerifyAccount() {
 
         // IF: profile.approved === true
         if (profile.approved === true) {
-          // ── Device Limit Validation ──────────────────────────────────────────
-          const { allowed, activeCount, maxSessions } = await validateSessionLimit(userId)
+          // PREMIUM FEATURE
+          // Advanced Multi-Device Enforcement
+          // Disabled via feature flag
+          // To re-enable:
+          // FEATURE_FLAGS.PREMIUM_DEVICE_ENFORCEMENT = true
+          if (FEATURE_FLAGS.PREMIUM_DEVICE_ENFORCEMENT) {
+            // ── Device Limit Validation ──────────────────────────────────────────
+            const { allowed, activeCount, maxSessions } = await validateSessionLimit(userId)
 
-          if (!allowed) {
-            setLoading(false)
-            setStatus('error')
-            setShowLimitModal(true)
-            return
+            if (!allowed) {
+              setLoading(false)
+              setStatus('error')
+              setShowLimitModal(true)
+              return
+            }
           }
 
           await proceedWithSessionCreation(userId, session, user, profile)
