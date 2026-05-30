@@ -7,6 +7,7 @@ import {
   promoteUser,
   demoteUser
 } from '../services/adminService'
+import { getPlatformCapacity } from '../services/platformCapacityService'
 import AdminStats from '../components/AdminStats'
 import SearchBar from '../components/SearchBar'
 import UserTable from '../components/UserTable'
@@ -24,6 +25,7 @@ export default function AdminDashboard() {
   const [actionLoading, setActionLoading] = useState(false)
   const [error,        setError]        = useState('')
   const [successMsg,   setSuccessMsg]   = useState('')
+  const [capacity,     setCapacity]     = useState({ max: 0, loading: true })
 
   const [searchQuery,  setSearchQuery]  = useState('')
   const [roleFilter,   setRoleFilter]   = useState('all')
@@ -52,9 +54,11 @@ export default function AdminDashboard() {
     try {
       const data = await getAllUsers()
       setUsers(data)
+      const cap = await getPlatformCapacity()
+      setCapacity({ max: cap, loading: false })
     } catch (err) {
-      console.error('Error fetching users:', err)
-      showNotification('Failed to fetch users. Check your RLS policies or database connection.', 'error')
+      console.error('Error fetching users or capacity:', err)
+      showNotification('Failed to fetch users or capacity. Check database connection.', 'error')
     } finally {
       setLoading(false)
       // Keep spinning for at least 600ms so the user can see the animation
@@ -70,6 +74,8 @@ export default function AdminDashboard() {
       try {
         const data = await getAllUsers()
         setUsers(data)
+        const cap = await getPlatformCapacity()
+        setCapacity({ max: cap, loading: false })
       } catch (err) {
         console.error('Silent auto-refresh error:', err)
       }
@@ -98,8 +104,9 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       showNotification(`Failed to approve: ${err.message}`, 'error')
-    } finally { bookkeeping => {}
-      setActionLoading(false) }
+    } finally {
+      setActionLoading(false)
+    }
   }
 
   const handleReject = (targetUser) => {
@@ -193,6 +200,21 @@ export default function AdminDashboard() {
   })
 
   const pendingCount = users.filter(u => !u.approved).length
+
+  const totalUsers = users.length
+  const maxUsers = capacity.max || 0
+  const remainingSlots = Math.max(0, maxUsers - totalUsers)
+  const usagePercent = maxUsers > 0 ? (totalUsers / maxUsers) * 100 : 0
+
+  let healthStatus = 'Healthy'
+  let healthColor = '#10b981' // Green
+  if (usagePercent >= 100) {
+    healthStatus = 'Full'
+    healthColor = '#ef4444' // Red
+  } else if (usagePercent >= 80) {
+    healthStatus = 'Warning'
+    healthColor = '#f97316' // Orange
+  }
 
   return (
     <>
@@ -298,6 +320,155 @@ export default function AdminDashboard() {
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
             {successMsg}
+          </div>
+        )}
+
+        {/* ── Capacity Indicator Card ─────────────────────────────────────── */}
+        {!capacity.loading && maxUsers > 0 && (
+          <div className="capacity-card-container" style={{
+            background: 'rgba(13, 20, 40, 0.7)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
+            borderRadius: '18px',
+            padding: '1.5rem',
+            marginBottom: '2rem',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1rem',
+              flexWrap: 'wrap',
+              gap: '0.75rem'
+            }}>
+              <div>
+                <h3 style={{
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  color: '#ffffff',
+                  margin: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                    <line x1="6" y1="6" x2="6.01" y2="6"/>
+                    <line x1="6" y1="18" x2="6.01" y2="18"/>
+                  </svg>
+                  Platform Capacity Management
+                </h3>
+                <p style={{
+                  fontSize: '0.8rem',
+                  color: 'var(--text-muted)',
+                  margin: '0.25rem 0 0 0'
+                }}>
+                  Licensed user slots allocation and health status
+                </p>
+              </div>
+
+              {/* Dynamic Health Indicator */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                padding: '0.4rem 0.8rem',
+                borderRadius: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+              }}>
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: healthColor,
+                  display: 'inline-block',
+                  boxShadow: `0 0 10px ${healthColor}`
+                }} />
+                <span style={{
+                  fontSize: '0.75rem',
+                  fontWeight: '700',
+                  color: '#ffffff',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  {healthStatus}
+                </span>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div style={{
+              width: '100%',
+              height: '10px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '5px',
+              overflow: 'hidden',
+              marginBottom: '1.25rem',
+              border: '1px solid rgba(255, 255, 255, 0.03)',
+            }}>
+              <div style={{
+                width: `${Math.min(100, usagePercent)}%`,
+                height: '100%',
+                backgroundColor: healthColor,
+                borderRadius: '5px',
+                transition: 'width 0.5s ease-in-out',
+                boxShadow: `0 0 12px ${healthColor}80`
+              }} />
+            </div>
+
+            {/* Statistics Row */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '1rem',
+            }}>
+              <div style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                padding: '0.75rem 1rem',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.03)',
+              }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
+                  Registered Users
+                </div>
+                <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#f1f5f9' }}>
+                  {totalUsers} <span style={{ fontSize: '0.8rem', fontWeight: '500', color: 'var(--text-muted)' }}>slots</span>
+                </div>
+              </div>
+
+              <div style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                padding: '0.75rem 1rem',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.03)',
+              }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
+                  Maximum Capacity
+                </div>
+                <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#f1f5f9' }}>
+                  {maxUsers} <span style={{ fontSize: '0.8rem', fontWeight: '500', color: 'var(--text-muted)' }}>slots</span>
+                </div>
+              </div>
+
+              <div style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                padding: '0.75rem 1rem',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.03)',
+              }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
+                  Available Slots
+                </div>
+                <div style={{ fontSize: '1.25rem', fontWeight: '800', color: healthColor }}>
+                  {remainingSlots} <span style={{ fontSize: '0.8rem', fontWeight: '500', color: 'var(--text-muted)' }}>slots</span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

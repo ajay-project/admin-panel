@@ -12,6 +12,7 @@ export default function Signup() {
   const [redirecting,  setRedirecting]  = useState(false)
   const [redirectType, setRedirectType] = useState('') // 'scenario_a' | 'scenario_b' | 'scenario_c'
   const [countdown,    setCountdown]    = useState(5)
+  const [showCapacityModal, setShowCapacityModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { signup, user, profile }       = useAuth()
   const navigate                        = useNavigate()
@@ -65,7 +66,9 @@ export default function Signup() {
       setRedirecting(true)
     } catch (err) {
       const msg = err.message || ''
-      if (msg.includes('already registered. Please login')) {
+      if (msg === 'CAPACITY_FULL') {
+        setShowCapacityModal(true)
+      } else if (msg.includes('already registered. Please login')) {
         // Scenario A: Clear inputs and redirect
         setName('')
         setEmail('')
@@ -454,6 +457,100 @@ export default function Signup() {
           </div>
         </div>
       </div>
+      {showCapacityModal && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.75)",
+          backdropFilter: "blur(8px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+        }}>
+          <div style={{
+            background: "rgba(13, 20, 40, 0.95)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            borderRadius: "var(--radius-xl, 12px)",
+            padding: "2.5rem",
+            maxWidth: "480px",
+            width: "90%",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+            textAlign: "center",
+            position: "relative",
+          }}>
+            <div style={{
+              width: "64px",
+              height: "64px",
+              borderRadius: "50%",
+              backgroundColor: "rgba(239, 68, 68, 0.1)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "1.5rem",
+              color: "#ef4444",
+            }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <h3 style={{
+              fontSize: "1.5rem",
+              fontWeight: "700",
+              color: "#ffffff",
+              marginBottom: "1.25rem",
+              marginTop: "0",
+            }}>
+              Registration Unavailable
+            </h3>
+            <p style={{
+              fontSize: "0.95rem",
+              color: "var(--text-muted)",
+              lineHeight: "1.6",
+              marginBottom: "1rem",
+              marginTop: "0",
+            }}>
+              The platform has reached its maximum licensed user capacity.
+            </p>
+            <p style={{
+              fontSize: "0.95rem",
+              color: "var(--text-muted)",
+              lineHeight: "1.6",
+              marginBottom: "1rem",
+              marginTop: "0",
+            }}>
+              New registrations are currently unavailable.
+            </p>
+            <p style={{
+              fontSize: "0.95rem",
+              color: "var(--text-muted)",
+              lineHeight: "1.6",
+              marginBottom: "2rem",
+              marginTop: "0",
+            }}>
+              Please contact the platform administrator for additional capacity.
+            </p>
+            <button
+              onClick={() => setShowCapacityModal(false)}
+              style={{
+                width: "100%",
+                padding: "0.85rem",
+                borderRadius: "var(--radius-md, 8px)",
+                background: "linear-gradient(135deg, #f97316, #ea580c)",
+                color: "#ffffff",
+                fontWeight: "600",
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 4px 15px rgba(249, 115, 22, 0.3)",
+                transition: "all 0.2s",
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }
