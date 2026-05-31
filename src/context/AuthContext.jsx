@@ -31,12 +31,13 @@ function readCache() {
 }
 
 function clearCache() {
-  localStorage.removeItem('admin_auth_session')
-  localStorage.removeItem('admin_auth_profile')
-  localStorage.removeItem('admin_verified_user')
-  localStorage.removeItem('admin_auth_verified_at')
-  localStorage.removeItem('pending_verification_user')
-  localStorage.removeItem('current_device_session_token')
+  const errorMsg = localStorage.getItem("login_error_message");
+  try {
+    localStorage.clear();
+  } catch (e) {}
+  if (errorMsg) {
+    localStorage.setItem("login_error_message", errorMsg);
+  }
   try {
     sessionStorage.clear()
   } catch (e) {}
@@ -100,14 +101,14 @@ export function AuthProvider({ children }) {
         const result = await validateCurrentSession(currentToken);
         const isSessionValid = result?.isValid === true;
 
-        if (userProfile?.approved === true && isSessionValid) {
+        if (userProfile?.approved === true && userProfile?.role === 'admin' && isSessionValid) {
           writeCache(session, userProfile, session.user)
           if (mounted) {
             setUser(session.user)
             setProfile(userProfile)
           }
         } else {
-          // Account no longer approved or session invalid/revoked — force logout
+          // Account no longer approved, not an admin, or session invalid/revoked — force logout
           clearCache()
           await supabase.auth.signOut()
           if (mounted) { setUser(null); setProfile(null) }
@@ -277,7 +278,7 @@ export function AuthProvider({ children }) {
           const { validateCurrentSession } = await import("../services/sessionService")
           const result = await validateCurrentSession(currentToken)
 
-          if (!result || !result.isValid) {
+          if (!result || !result.isValid || result.role !== 'admin') {
 
             clearInterval(heartbeatId)
             clearInterval(cleanupId)
@@ -290,7 +291,7 @@ export function AuthProvider({ children }) {
 
             localStorage.setItem(
               "login_error_message",
-              "Your session has been terminated (either limit exceeded, force logged out, or expired)."
+              "Your session has been terminated (either limit exceeded, force logged out, lack of admin privileges, or expired)."
             )
             window.location.href = "/login"
           } else if (result.role && result.role !== profile?.role) {

@@ -147,6 +147,16 @@ export default function VerifyAccount() {
           return
         }
 
+        // Enforce that only users with the 'admin' role can log in to the admin panel
+        if (profile.role !== 'admin') {
+          localStorage.removeItem('pending_verification_user')
+          setLoading(false)
+          setStatus('pending')
+          setShowPendingModal(true)
+          await logout()
+          return
+        }
+
         // IF: profile.approved === true
         if (profile.approved === true) {
           // PREMIUM FEATURE
